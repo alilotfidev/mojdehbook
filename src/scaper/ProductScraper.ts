@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer";
 import { AppDataSource } from "../data-source";
-import { Product } from "../db/entities/Product";
+import { ProductFactory } from "../factories/ProductFactory";
 import { ProductRepository } from "../repositories/ProductRepository";
 
 export async function scrapeProducts() {
@@ -81,14 +81,17 @@ export async function scrapeProducts() {
     console.log(`saving: ${b.title}`);
 
     try {
-      await productRepository.save({
-        name: b.title,
+      // Create product using factory
+      const productDTO = ProductFactory.createFromScrapedData({
+        title: b.title,
         author: b.author,
         rating: b.rating,
         price: b.price,
         url: b.url,
         image: b.image,
       });
+
+      await productRepository.save(productDTO);
     } catch (err) {
       console.error("Error saving product:", err);
     }
